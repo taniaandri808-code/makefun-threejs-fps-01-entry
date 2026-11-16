@@ -57,15 +57,49 @@ export function createWorld(scene) {
   box(2, 0.8, 2, 7, 0.4, 6, 'hairline');
   box(2, 1.4, 1.2, 10, 0.7, 10, 'hairline');
 
-  // Bomb Site A (Back Left Warehouse)
+  // Bomb Site A (Back Left Warehouse) — red zone with glowing letter marker
   const siteAMesh = box(5, 0.05, 5, -10, 0.02, -14, 'accent', false);
+  siteAMesh.material = new THREE.MeshStandardMaterial({ color: 0xd23b2e, emissive: 0xd23b2e, emissiveIntensity: 0.5, roughness: 0.9 });
   siteAMesh.userData = { bombSite: 'A' };
   bombSites.push({ id: 'A', center: new THREE.Vector3(-10, 0, -14), mesh: siteAMesh });
 
-  // Bomb Site B (Back Right Courtyard)
+  // Bomb Site B (Back Right Courtyard) — blue zone with glowing letter marker
   const siteBMesh = box(5, 0.05, 5, 10, 0.02, -14, 'accent', false);
+  siteBMesh.material = new THREE.MeshStandardMaterial({ color: 0x2e6bd2, emissive: 0x2e6bd2, emissiveIntensity: 0.5, roughness: 0.9 });
   siteBMesh.userData = { bombSite: 'B' };
   bombSites.push({ id: 'B', center: new THREE.Vector3(10, 0, -14), mesh: siteBMesh });
+
+  // Glowing site letter signs so sites read at a glance
+  function siteSign(letter, colorHex, x, z) {
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 128;
+    const g = c.getContext('2d');
+    g.fillStyle = colorHex; g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#ffffff'; g.font = 'bold 92px sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(letter, 64, 70);
+    const tex = new THREE.CanvasTexture(c);
+    const sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.4, 2.4),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }),
+    );
+    sign.position.set(x, 2.6, z);
+    group.add(sign);
+  }
+  siteSign('A', '#d23b2e', -10, -13.9);
+  siteSign('B', '#2e6bd2', 10, -13.9);
+
+  // Emissive accent strips along each lane for wayfinding
+  function strip(x, z, len, colorHex) {
+    const s = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.06, len),
+      new THREE.MeshStandardMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.7 }),
+    );
+    s.position.set(x, 0.05, z);
+    group.add(s);
+  }
+  strip(-9, 0, 30, '#ff9d1b');  // Warehouse lane
+  strip(9, 0, 30, '#ff9d1b');   // Courtyard lane
 
   // Spawns
   const playerSpawn = new THREE.Vector3(0, 0, 15);
@@ -77,10 +111,10 @@ export function createWorld(scene) {
   ];
 
   // Lighting
-  const sky = new THREE.HemisphereLight(new THREE.Color(PALETTE.surface), new THREE.Color(PALETTE.canvas), 1.2);
+  const sky = new THREE.HemisphereLight(new THREE.Color('#eaf1ff'), new THREE.Color('#a89f92'), 1.6);
   scene.add(sky);
 
-  const key = new THREE.DirectionalLight(new THREE.Color(PALETTE.ink), 2.2);
+  const key = new THREE.DirectionalLight(new THREE.Color(PALETTE.ink), 2.6);
   key.position.set(10, 16, 8);
   key.target.position.set(0, 0, 0);
   key.castShadow = true;
@@ -93,7 +127,7 @@ export function createWorld(scene) {
   key.shadow.bias = -0.0005;
   scene.add(key, key.target);
 
-  const fill = new THREE.DirectionalLight(new THREE.Color(PALETTE.muted), 0.6);
+  const fill = new THREE.DirectionalLight(new THREE.Color(PALETTE.muted), 0.9);
   fill.position.set(-10, 10, 12);
   scene.add(fill);
 

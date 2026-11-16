@@ -34,8 +34,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.getElementById('game').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(PALETTE.canvas);
-scene.fog = new THREE.Fog(new THREE.Color(PALETTE.canvas), 20, 50);
+scene.background = new THREE.Color('#bcd0e8');
+scene.fog = new THREE.Fog(new THREE.Color('#cfd8e4'), 30, 80);
 const camera = new THREE.PerspectiveCamera(74, window.innerWidth / window.innerHeight, 0.05, 140);
 scene.add(camera);
 
